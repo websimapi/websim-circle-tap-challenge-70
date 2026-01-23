@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Circle Tap Challenge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ui.css">
+    <link rel="stylesheet" href="leaderboard.css">
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+    
+    <!-- Opponent View (VS Mode) -->
+    <div id="opponent-view" class="hidden">
+        <div class="opponent-info">
+            <div class="opponent-identity">
+                <img id="opponent-pfp" class="vs-pfp" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+                <span id="opponent-name">Waiting...</span>
+            </div>
+            <div class="hearts-container small" id="opponent-hearts">
+                <!-- Generated in JS -->
+            </div>
+            <div id="opponent-score" class="vs-score-text">Score: 0</div>
+        </div>
+        <div class="opponent-canvas-wrapper">
+            <canvas id="opponent-canvas" width="100" height="100"></canvas>
+            <div id="opponent-level">1</div>
+        </div>
+    </div>
+
+    <!-- Player Hearts (VS Mode) -->
+    <div id="player-hearts-container" class="hidden">
+        <div class="hearts-container" id="player-hearts">
+            <!-- Generated in JS -->
+        </div>
+        <div id="player-vs-score" class="vs-score-text">Score: 0</div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-container">
+            <!-- Standard Difficulty Indicator -->
+            <div id="difficulty-indicator" data-difficulty="easy" title="Difficulty: Easy">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+
+            <div id="score-display" class="hidden">Score: <span id="score">0</span></div>
+            
+            <!-- VS Status Display -->
+            <div id="vs-status-display" class="hidden">Waiting for opponent...</div>
+            
+            <div id="level-display" class="hidden">1</div>
+            
+            <div id="start-menu">
+                <button id="about-btn" class="icon-btn" aria-label="About">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/>
+                    </svg>
+                </button>
+                <button id="start-leaderboard-btn" class="icon-btn" aria-label="Leaderboard">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 13h3v7H3v-7zm5-2h3v9H8v-9zm5-6h3v15h-3V5z"></path>
+                    </svg>
+                </button>
+                <h1 class="title-large">Circle Tap</h1>
+                <div id="tap-to-start" class="blink">Tap to Start</div>
+                <div class="difficulty-selector" id="start-difficulty-selector">
+                    <button class="diff-btn active" data-difficulty="easy">
+                        <div class="diff-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                        <span>Easy</span>
+                    </button>
+                    <button class="diff-btn" data-difficulty="medium">
+                        <div class="diff-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                        <span>Med</span>
+                    </button>
+                    <button class="diff-btn" data-difficulty="hard">
+                        <div class="diff-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                        <span>Hard</span>
+                    </button>
+                </div>
+                <!-- VS Mode Button -->
+                <div class="vs-menu-wrapper">
+                    <button id="vs-mode-btn" class="vs-btn">
+                        <span class="vs-icon">⚔️</span> VS MODE
+                    </button>
+                    <div id="vs-lobby-preview" class="vs-lobby-preview">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="game-over-menu" class="hidden">
+                <h1 class="title-large">Circle Tap</h1>
+                <p class="score-text">Final Score: <span id="final-score">0</span></p>
+                <div id="tap-to-restart" class="blink">Tap to Restart</div>
+                
+                <div class="difficulty-selector" id="game-over-difficulty-selector">
+                    <button class="diff-btn active" data-difficulty="easy">
+                        <div class="diff-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                        <span>Easy</span>
+                    </button>
+                    <button class="diff-btn" data-difficulty="medium">
+                        <div class="diff-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                        <span>Med</span>
+                    </button>
+                    <button class="diff-btn" data-difficulty="hard">
+                        <div class="diff-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                        <span>Hard</span>
+                    </button>
+                </div>
+
+                <div id="game-over-buttons">
+                    <div class="button-row">
+                        <button id="submit-score-btn" class="menu-btn">Submit Score</button>
+                        <button id="replay-btn" class="menu-btn">Instant Replay</button>
+                    </div>
+                    <div class="button-row icon-row">
+                        <button id="home-btn" class="menu-btn icon-only" aria-label="Back to Home">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"></path>
+                            </svg>
+                        </button>
+                        <button id="leaderboard-btn" class="menu-btn icon-only" aria-label="Leaderboard">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3 13h3v7H3v-7zm5-2h3v9H8v-9zm5-6h3v15h-3V5z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button id="music-toggle-btn" class="icon-btn" aria-label="Toggle Audio">
+                <!-- State 0: All On -->
+                <svg class="audio-on" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-4 0h-2.5l-5 5h-4.5v7.54h4.5l5 5v-17.54z"/></svg>
+                <!-- State 1: Music Off (Red Cross) -->
+                <svg class="music-off hidden" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4.27 3L3 4.27 19.73 21 21 19.73 4.27 3z"/> <!-- Slash -->
+                    <path d="M12 3v9.28a4.39 4.39 0 0 0-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z"/> <!-- Note -->
+                </svg>
+                <!-- State 2: All Off -->
+                <svg class="audio-off hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51c.66-1.24 1.03-2.65 1.03-4.15 0-4.28-2.99-7.86-7-8.76v2.1c2.89.86 5 3.54 5 6.66zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+            </button>
+        </div>
+    </div>
+    <div id="replay-container" class="hidden">
+        <div id="player-root"></div>
+        <button id="close-replay-btn" aria-label="Close replay">&times;</button>
+    </div>
+    <div id="about-view" class="hidden">
+        <div class="about-content">
+            <button id="close-about-btn" aria-label="Close About">&times;</button>
+            <h2>About Project</h2>
+            <p>This project was created on <a href="https://websim.ai" target="_blank">WebSim.ai</a>.</p>
+            <p>It utilizes cutting-edge AI tools for assets and features:</p>
+            <div class="logo-grid">
+                <div class="logo-item">
+                    <div class="logo-img-container"><img src="logo_websim.png" alt="WebSim"></div>
+                    <span>WebSim</span>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-img-container"><img src="logo_remotion.png" alt="Remotion"></div>
+                    <span>Remotion</span>
+                    <small>Instant Replays</small>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-img-container"><img src="logo_sonauto.png" alt="Sonauto"></div>
+                    <span>Sonauto</span>
+                    <small>Music Generation</small>
+                </div>
+                <div class="logo-item">
+                    <div class="logo-img-container"><img src="logo_elevenlabs.png" alt="ElevenLabs"></div>
+                    <span>ElevenLabs</span>
+                    <small>SFX Audio</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboard-view" class="hidden">
+        <!-- Main List View -->
+        <div id="leaderboard-main-view" class="view-container">
+            <button id="close-leaderboard-btn" aria-label="Close Leaderboard">&times;</button>
+            <h2>Leaderboard</h2>
+            <div id="leaderboard-difficulty-filters">
+                <button class="leaderboard-filter-btn active" data-difficulty="easy">Easy</button>
+                <button class="leaderboard-filter-btn" data-difficulty="medium">Medium</button>
+                <button class="leaderboard-filter-btn" data-difficulty="hard">Hard</button>
+                <button id="my-scores-btn" class="leaderboard-filter-btn" data-difficulty="mine">My Scores</button>
+            </div>
+            <div id="leaderboard-list" class="list-container">
+                <!-- Scores will be populated here -->
+            </div>
+            <div id="leaderboard-pagination" class="pagination-container hidden">
+                <!-- Pagination controls will be populated here -->
+            </div>
+        </div>
+
+        <!-- Detailed Score View -->
+        <div id="leaderboard-detail-view" class="view-container hidden">
+            <div class="detail-header">
+                <button id="detail-back-btn" class="back-nav-btn" aria-label="Back">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                    <span>Back</span>
+                </button>
+                <div id="detail-header-content"></div>
+            </div>
+            <div id="detail-list" class="list-container">
+                <!-- Detailed scores list -->
+            </div>
+            <div id="detail-pagination" class="pagination-container hidden">
+                <!-- Detail pagination -->
+            </div>
+        </div>
+    </div>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.3.1?dev",
+        "react-dom": "https://esm.sh/react-dom@18.3.1?dev",
+        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?dev",
+        "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime?dev",
+        "react/jsx-dev-runtime": "https://esm.sh/react@18.3.1/jsx-dev-runtime?dev",
+        "remotion": "https://esm.sh/remotion@4.0.350?external=react,react-dom&dev",
+        "@remotion/player": "https://esm.sh/@remotion/player@4.0.350?external=react,react-dom&dev",
+        "@websim/remotion/player": "https://esm.websim.com/@websim/remotion/player",
+        "marked": "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js",
+        "dompurify": "https://cdn.jsdelivr.net/npm/dompurify/dist/purify.es.min.js",
+        "d3-color": "https://esm.sh/d3-color@3.1.0",
+        "three": "https://esm.sh/three"
+      }
+    }
+    </script>
+    <script type="module" src="background.js"></script>
+    <script type="module" src="utils.js"></script>
+    <script type="module" src="audio.js"></script>
+    <script type="module" src="game.js"></script>
+    <script type="module" src="leaderboard.js"></script>
+    <script type="module" src="replay.js"></script>
+    <script type="module" src="ui.js"></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="main.jsx"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

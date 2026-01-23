@@ -1,0 +1,59 @@
+:root {
+    --bg-color: #1a1a2e;
+    --primary-color: #16213e;
+    --secondary-color: #0f3460;
+    --accent-color: #e94560;
+    --text-color: #dcdcdc;
+    --success-color: #4CAF50; /* Initial color for level 1 */
+    --fail-color: #e94560;
+    --ui-scale: 1; /* Dynamic scale factor */
+}
+
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* background-color is now handled by the 3D canvas */
+    color: var(--text-color);
+    font-family: 'Arial', sans-serif;
+}
+
+#background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+#game-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#game-canvas {
+    max-width: 90vw;
+    max-height: 90vh;
+    aspect-ratio: 1 / 1;
+    background-color: transparent;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    touch-action: none; /* Prevents double tap zoom */
+}
+
+/* removed #ui-container ... #music-toggle-btn: moved to ui.css */
+/* removed #leaderboard-view ... #leaderboard-pagination: moved to leaderboard.css */
+/* removed profile styles: moved to leaderboard.css */
